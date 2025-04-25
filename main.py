@@ -3,6 +3,8 @@ import re
 
 from fastapi import FastAPI
 
+import matplotlib.pyplot as plt
+
 from update import getYears, import_data_to_sqlalchemy
 
 app = FastAPI()
@@ -52,7 +54,6 @@ for name in performance_names:
 
 print(max_performances_name)
 print(max_performances)
-
 
 # Use the function with your database
 import_data_to_sqlalchemy(db)
@@ -150,6 +151,50 @@ async def get_athlete_information(name: str):
                             except KeyError:
                                 pass
 
+    keysArray = []
+    temp = list(athlete["placements"].keys())
+    for key in temp:
+        for bar in range(len(keysArray)):
+            try:
+                int(key)
+                if int(key) < int(keysArray[bar]):
+                    keysArray.insert(bar, key)
+            except:
+                
+
+    for key in temp:
+        flag = False
+        for bar in range(len(keysArray)):
+            try:
+                int(key)
+            except:
+                keysArray.append(key)
+                continue
+
+            try:
+                if int(key) < int(keysArray[bar]):
+                    keysArray.insert(bar, key)
+                    flag = True
+            except:
+                continue
+
+            if flag:
+                break
+
+    valuesArray = []
+    for key in keysArray:
+        valuesArray.append(athlete["placements"][key])
+    
+
+    print(keysArray)
+    print(valuesArray)
+
+    plt.plot(keysArray, valuesArray)
+    capitalized_name = ""
+    for part in name.split(" "):
+        capitalized_name += " " + part.capitalize()
+    plt.title(capitalized_name + " placement history")
+    plt.show()
 
     return athlete
 
