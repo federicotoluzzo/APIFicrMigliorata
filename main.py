@@ -151,35 +151,40 @@ async def get_athlete_information(name: str):
                             except KeyError:
                                 pass
 
-    keysArray = []
     temp = list(athlete["placements"].keys())
+    keysArray = []
+    print(temp)
     for key in temp:
+        if len(keysArray) == 0:
+            keysArray.append(key)
+            continue
+
+        inserted = False
         for bar in range(len(keysArray)):
-            try:
-                int(key)
-                if int(key) < int(keysArray[bar]):
+            if has_numbers(key):
+                if has_numbers(keysArray[bar]):
+                    if int(key) < int(keysArray[bar]):
+                        keysArray.insert(bar, key)
+                        inserted = True
+                        break
+                else:
                     keysArray.insert(bar, key)
-            except:
-                
+                    inserted = True
+                    break
+            else:
+                if not has_numbers(keysArray[bar]):
+                    if key < keysArray[bar]:
+                        keysArray.insert(bar, key)
+                        inserted = True
+                        break
 
-    for key in temp:
-        flag = False
-        for bar in range(len(keysArray)):
-            try:
-                int(key)
-            except:
-                keysArray.append(key)
-                continue
+        if not inserted:
+            keysArray.append(key)
 
-            try:
-                if int(key) < int(keysArray[bar]):
-                    keysArray.insert(bar, key)
-                    flag = True
-            except:
-                continue
 
-            if flag:
-                break
+
+
+
 
     valuesArray = []
     for key in keysArray:
@@ -190,6 +195,8 @@ async def get_athlete_information(name: str):
     print(valuesArray)
 
     plt.plot(keysArray, valuesArray)
+    plt.style.use("ggplot")
+
     capitalized_name = ""
     for part in name.split(" "):
         capitalized_name += " " + part.capitalize()
@@ -211,3 +218,6 @@ async def root():
 @app.get("/hello/{name}")
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
+
+def has_numbers(inputString):
+    return any(char.isdigit() for char in inputString)
